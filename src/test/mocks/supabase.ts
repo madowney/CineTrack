@@ -56,6 +56,9 @@ export const mockMovies: Movie[] = [
 export const createMockSupabaseClient = () => {
   const mockFrom = vi.fn().mockReturnValue({
     select: vi.fn().mockReturnValue({
+      eq: vi.fn().mockReturnValue({
+        order: vi.fn().mockResolvedValue({ data: mockMovies, error: null }),
+      }),
       order: vi.fn().mockResolvedValue({ data: mockMovies, error: null }),
     }),
     insert: vi.fn().mockResolvedValue({ data: null, error: null }),
