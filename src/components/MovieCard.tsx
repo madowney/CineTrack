@@ -14,15 +14,21 @@ export function MovieCard({ movie, onClick, onToggleWatched }: MovieCardProps) {
       className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden transition-all hover:shadow-lg cursor-pointer"
       onClick={() => onClick(movie)}
     >
-      {movie.poster_url && (
-        <div className="h-48 overflow-hidden">
+      <div className="aspect-[2/3] overflow-hidden bg-gray-200 dark:bg-gray-700">
+        {movie.poster_url ? (
           <img
             src={movie.poster_url}
             alt={movie.title}
             className="w-full h-full object-cover"
           />
-        </div>
-      )}
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-gray-400 dark:text-gray-500">
+            <svg className="w-16 h-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+            </svg>
+          </div>
+        )}
+      </div>
       <div className="p-4">
         <div className="flex items-start justify-between">
           <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

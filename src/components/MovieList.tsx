@@ -2,16 +2,19 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { useAuth } from '@/context/AuthContext'
 import { Movie, MovieInsert } from '@/types/database'
 import { MovieCard } from './MovieCard'
 import { MovieForm } from './MovieForm'
 import { MovieDetail } from './MovieDetail'
 import { Modal } from './Modal'
+import Link from 'next/link'
 
 // Form data type matching MovieForm's output
 type MovieFormData = Omit<MovieInsert, 'id' | 'created_at' | 'updated_at'>
 
 export function MovieList() {
+  const { user, isLoading: authLoading } = useAuth()
   const [movies, setMovies] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -24,11 +27,18 @@ export function MovieList() {
   const supabase = createClient()
 
   const fetchMovies = async () => {
+    if (!user) {
+      setMovies([])
+      setLoading(false)
+      return
+    }
+
     try {
       setLoading(true)
       const { data, error } = await supabase
         .from('movies')
         .select('*')
+        .eq('user_id', user.id)
         .order('created_at', { ascending: false })
 
       if (error) throw error
@@ -41,8 +51,10 @@ export function MovieList() {
   }
 
   useEffect(() => {
-    fetchMovies()
-  }, [])
+    if (!authLoading) {
+      fetchMovies()
+    }
+  }, [user, authLoading])
 
   const handleSubmitMovie = async (movieData: MovieFormData) => {
     try {
@@ -56,8 +68,11 @@ export function MovieList() {
         if (error) throw error
         setEditingMovie(null)
       } else {
-        // Add new movie
-        const { error } = await supabase.from('movies').insert(movieData)
+        // Add new movie with user_id
+        const { error } = await supabase.from('movies').insert({
+          ...movieData,
+          user_id: user!.id,
+        })
         if (error) throw error
       }
 
@@ -120,10 +135,42 @@ export function MovieList() {
     return true
   })
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
       <div className="flex justify-center items-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className="text-center py-16">
+        <div className="max-w-md mx-auto">
+          <svg className="w-16 h-16 mx-auto text-gray-400 dark:text-gray-600 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 4v16M17 4v16M3 8h4m10 0h4M3 12h18M3 16h4m10 0h4M4 20h16a1 1 0 001-1V5a1 1 0 00-1-1H4a1 1 0 00-1 1v14a1 1 0 001 1z" />
+          </svg>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Track Your Movies
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400 mb-6">
+            Sign in to start tracking your movie collection, create watchlists, and rate your favorites.
+          </p>
+          <div className="flex justify-center gap-4">
+            <Link
+              href="/login"
+              className="px-4 py-2 text-sm font-medium text-gray-700 dark:text-gray-300 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+            >
+              Sign in
+            </Link>
+            <Link
+              href="/register"
+              className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+            >
+              Create account
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }

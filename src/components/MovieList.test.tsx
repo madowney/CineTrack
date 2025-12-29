@@ -8,12 +8,29 @@ vi.mock('@/lib/supabase/client', () => ({
   createClient: vi.fn(() => createMockSupabaseClient()),
 }))
 
+// Mock useAuth
+const mockUseAuth = vi.fn()
+vi.mock('@/context/AuthContext', () => ({
+  useAuth: () => mockUseAuth(),
+}))
+
 describe('MovieList', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    // Default: authenticated user
+    mockUseAuth.mockReturnValue({
+      user: { id: 'test-user-id', email: 'test@example.com' },
+      isLoading: false,
+    })
   })
 
   it('renders loading state initially', () => {
+    // Set auth to loading state
+    mockUseAuth.mockReturnValue({
+      user: null,
+      isLoading: true,
+    })
+
     render(<MovieList />)
 
     // Should show loading spinner
@@ -95,6 +112,9 @@ describe('MovieList', () => {
     vi.mocked(createClient).mockReturnValue({
       from: vi.fn().mockReturnValue({
         select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            order: vi.fn().mockResolvedValue({ data: [], error: null }),
+          }),
           order: vi.fn().mockResolvedValue({ data: [], error: null }),
         }),
         insert: vi.fn().mockResolvedValue({ data: null, error: null }),
