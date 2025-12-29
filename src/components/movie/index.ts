@@ -1,0 +1,5 @@
+export { MovieHero } from './MovieHero'
+export { MovieOverview } from './MovieOverview'
+export { CastCarousel } from './CastCarousel'
+export { SimilarMovies } from './SimilarMovies'
+export { StreamingProviders } from './StreamingProviders'
