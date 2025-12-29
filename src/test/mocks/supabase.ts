@@ -1,6 +1,29 @@
 import { vi } from 'vitest'
 import { Movie } from '@/types/database'
 
+// Base TMDB fields that are null by default for test data
+const tmdbDefaults = {
+  tmdb_id: null,
+  imdb_id: null,
+  overview: null,
+  tagline: null,
+  backdrop_url: null,
+  runtime: null,
+  release_date: null,
+  director: null,
+  cast_members: [],
+  crew_members: [],
+  genres: [],
+  production_companies: [],
+  vote_average: null,
+  vote_count: null,
+  popularity: null,
+  mpaa_rating: null,
+  status: null,
+  tmdb_last_fetched: null,
+  user_id: null,
+}
+
 export const mockMovies: Movie[] = [
   {
     id: '1',
@@ -13,6 +36,7 @@ export const mockMovies: Movie[] = [
     watched: true,
     notes: 'Great movie',
     poster_url: null,
+    ...tmdbDefaults,
   },
   {
     id: '2',
@@ -25,6 +49,7 @@ export const mockMovies: Movie[] = [
     watched: false,
     notes: null,
     poster_url: null,
+    ...tmdbDefaults,
   },
 ]
 
